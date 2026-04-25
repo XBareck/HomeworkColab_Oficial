@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - HomeWorkColab{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4 fade-in">
+    <div class="col-lg-8 text-center">
+        <h2 class="fw-bold text-dark mb-3">Encuentra los mejores apuntes</h2>
+        <form action="{% url 'home' %}" method="GET" class="d-flex w-100 shadow-sm rounded-pill bg-white p-2 border">
+            <input type="text" name="q" class="form-control border-0 bg-transparent px-4 shadow-none" 
+                   placeholder="Busca por título, tema o palabra clave..." value="{{ query|default:'' }}">
+            <button class="btn btn-primary rounded-pill px-4 fw-bold" type="submit">
+                <i class="bi bi-search me-1"></i> Buscar
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="container mb-5 fade-in" style="animation-delay: 0.1s;">
+    <div class="category-scroll-container py-2">
+        <span class="fw-bold text-secondary me-3 d-none d-md-inline-block">Explorar:</span>
+        
+        <a href="{% url 'home' %}" class="btn rounded-pill btn-filter {% if not request.GET.cat %}active{% endif %}">
+            Todos
+        </a>
+
+        {% for cat in categorias %}
+            <a href="{% url 'home' %}?cat={{ cat.id }}{% if query %}&q={{ query }}{% endif %}" 
+               class="btn rounded-pill btn-filter {% if request.GET.cat == cat.id|stringformat:'i' %}active{% endif %}">
+                {{ cat.nombre }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="row g-4 fade-in" style="animation-delay: 0.2s;">
+    {% for trabajo in trabajos %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 transition-hover">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                            {{ trabajo.categoria.nombre }}
+                        </span>
+                        <small class="text-muted"><i class="bi bi-calendar3"></i> {{ trabajo.fecha_subida|date:"d M" }}</small>
+                    </div>
+                    
+                    <h5 class="card-title fw-bold text-dark mb-2">{{ trabajo.titulo|truncatechars:50 }}</h5>
+                    <p class="card-text text-secondary small" style="line-height: 1.6;">
+                        {{ trabajo.descripcion|truncatechars:100 }}
+                    </p>
+                </div>
+                
+                <div class="card-footer bg-white border-0 p-4 pt-0 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-light text-primary rounded-circle d-flex justify-content-center align-items-center fw-bold me-2" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                            {{ trabajo.usuario.username|first|upper }}
+                        </div>
+                        <small class="text-muted fw-bold">@{{ trabajo.usuario.username|truncatechars:10 }}</small>
+                    </div>
+                    
+                    <a href="{% url 'detalle_trabajo' trabajo.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                        Ver detalle
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="bg-light rounded-circle d-inline-block p-4 mb-3">
+                <i class="bi bi-search display-4 text-muted"></i>
+            </div>
+            <h4 class="fw-bold text-dark">No encontramos resultados</h4>
+            <p class="text-muted">Intenta buscar con otras palabras o selecciona otra categoría.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-4 mt-2">Ver todos los trabajos</a>
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    /* Animación de entrada */
+    .fade-in { animation: fadeIn 0.5s ease-out backwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Efecto hover en tarjetas */
+    .transition-hover { transition: all 0.3s ease; top: 0; position: relative; }
+    .transition-hover:hover { 
+        transform: translateY(-5px); 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important; 
+    }
+
+    /* Contenedor de scroll para las categorías */
+    .category-scroll-container {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none; /* Oculta scrollbar en Firefox */
+    }
+    .category-scroll-container::-webkit-scrollbar {
+        display: none; /* Oculta scrollbar en Chrome/Safari */
+    }
+
+    /* Estilo de los botones de filtro */
+    .btn-filter {
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid transparent;
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding: 0.4rem 1.2rem;
+        transition: 0.2s;
+    }
+    .btn-filter:hover { background-color: #e2e8f0; }
+    .btn-filter.active {
+        background-color: #2563eb;
+        color: white;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+</style>
+{% endblock %}

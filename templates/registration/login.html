@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión - HomeWorkColab{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="col-md-6 col-lg-4">
+        
+        <div class="card p-4 p-sm-5 shadow-lg border-0 fade-in-up">
+            <div class="text-center mb-4">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-block p-4 mb-3">
+                    <i class="bi bi-person-bounding-box text-primary display-6"></i>
+                </div>
+                <h2 class="fw-bold text-dark">¡Bienvenido!</h2>
+                <p class="text-muted small">Ingresa a tu cuenta para continuar</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-floating mb-3">
+                    <input type="text" name="username" class="form-control" id="floatingUser" placeholder="Usuario" required autocomplete="username">
+                    <label for="floatingUser" class="text-muted"><i class="bi bi-person me-2"></i>Nombre de usuario</label>
+                </div>
+                
+                <div class="form-floating mb-4">
+                    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Contraseña" required autocomplete="current-password">
+                    <label for="floatingPassword" class="text-muted"><i class="bi bi-key me-2"></i>Contraseña</label>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-danger py-2 small border-0 shadow-sm text-center rounded-3">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Usuario o contraseña incorrectos.
+                </div>
+                {% endif %}
+
+                <button class="btn btn-primary btn-lg w-100 mb-3 shadow-sm" type="submit">
+                    Iniciar Sesión <i class="bi bi-arrow-right-short ms-1"></i>
+                </button>
+            </form>
+
+            <hr class="my-4 text-muted">
+
+            <div class="text-center">
+                <span class="text-muted small">¿No tienes una cuenta?</span><br>
+                <a href="{% url 'registro' %}" class="fw-bold text-decoration-none text-primary">Regístrate ahora</a>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

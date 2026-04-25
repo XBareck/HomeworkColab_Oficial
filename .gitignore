@@ -1,0 +1,16 @@
+# Entornos virtuales
+venv/
+env/
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Base de datos local (Opcional: borra esta línea si QUIERES subir tu base de datos con los usuarios de prueba)
+# db.sqlite3
+
+# Variables de entorno
+.env
+
+# Archivos de pytest
+.pytest_cache/

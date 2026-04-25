@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ trabajo.titulo }} - HomeWorkColab{% endblock %}
+
+{% block content %}
+<div class="row g-4 my-2">
+    <div class="col-lg-8">
+        
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 fade-in">
+            
+            <nav aria-label="breadcrumb" class="mb-3 d-flex justify-content-between align-items-center">
+                <ol class="breadcrumb small mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-secondary">Inicio</a></li>
+                    <li class="breadcrumb-item active text-primary fw-bold">{{ trabajo.categoria.nombre }}</li>
+                </ol>
+                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i> {{ trabajo.fecha_subida|date:"d M, Y" }}</small>
+            </nav>
+
+            <h1 class="display-6 fw-bold text-dark mb-4">{{ trabajo.titulo }}</h1>
+
+            <div class="d-flex align-items-center p-3 bg-light rounded-4 mb-4">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold me-3" style="width: 45px; height: 45px; font-size: 1.2rem;">
+                    {{ trabajo.usuario.username|first|upper }}
+                </div>
+                <div>
+                    <p class="mb-0 text-muted small">Subido por</p>
+                    <h6 class="mb-0 fw-bold">@{{ trabajo.usuario.username }}</h6>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <h6 class="fw-bold text-secondary mb-3 text-uppercase small">Descripción del aporte</h6>
+                <p class="text-dark fs-6" style="white-space: pre-wrap; line-height: 1.7;">{{ trabajo.descripcion }}</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 fade-in" style="animation-delay: 0.1s;">
+            <h4 class="fw-bold mb-4 d-flex align-items-center">
+                <i class="bi bi-chat-dots-fill text-primary me-2"></i> Comentarios <span class="badge bg-light text-secondary ms-2 rounded-pill">{{ trabajo.comentarios.count }}</span>
+            </h4>
+            
+            {% if user.is_authenticated %}
+                <form method="post" class="mb-5 bg-light p-4 rounded-4 border">
+                    {% csrf_token %}
+                    <div class="d-flex gap-3">
+                        <div class="bg-secondary bg-opacity-25 text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 40px; height: 40px;">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <textarea name="contenido" class="form-control border-0 bg-white mb-3 shadow-sm rounded-3 p-3" rows="3" placeholder="Añade un comentario a este aporte..." required></textarea>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Comentar</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            {% else %}
+                <div class="alert alert-light border rounded-4 text-center mb-5 py-4">
+                    <i class="bi bi-lock-fill text-muted fs-4 d-block mb-2"></i>
+                    <p class="mb-0 text-secondary">Debes <a href="{% url 'login' %}" class="fw-bold text-primary text-decoration-none">iniciar sesión</a> para dejar un comentario.</p>
+                </div>
+            {% endif %}
+
+            <div class="comments-list">
+                {% for c in trabajo.comentarios.all %}
+                <div class="p-4 mb-3 border-start border-primary border-4 bg-light rounded-4 d-flex justify-content-between align-items-start transition-hover">
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="fw-bold text-dark me-2">@{{ c.usuario.username }}</span>
+                            <small class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-clock me-1"></i>{{ c.fecha|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <p class="mb-0 text-secondary">{{ c.texto }}</p>
+                    </div>
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-sm btn-light text-danger rounded-circle shadow-sm" title="Reportar comentario" onclick="abrirReporteComentario('{{ c.id }}', '{{ c.usuario.username }}')">
+                        <i class="bi bi-flag-fill"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-chat-square text-light display-4"></i>
+                    <p class="mt-2">Aún no hay comentarios. ¡Sé el primero!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top fade-in" style="top: 100px; animation-delay: 0.2s;">
+            <div class="text-center mb-4">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-block p-4 mb-3">
+                    <i class="bi bi-file-earmark-arrow-down-fill text-primary display-5"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Descarga de Material</h5>
+                <p class="text-muted small">El archivo está listo para ti.</p>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <a href="{{ trabajo.archivo_url.url }}" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" download>
+                    <i class="bi bi-cloud-arrow-down-fill me-2"></i> Descargar Archivo
+                </a>
+                
+                {% if user.is_authenticated %}
+                <button type="button" class="btn btn-light text-danger btn-sm rounded-pill mt-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalReporteTrabajo">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Reportar problema
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalReporteTrabajo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{% url 'reportar' 'trabajo' trabajo.id %}" method="post" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            {% csrf_token %}
+            <div class="modal-header bg-danger text-white border-0 p-4">
+                <h5 class="modal-title fw-bold"><i class="bi bi-shield-exclamation me-2"></i>Reportar este material</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <label class="form-label small fw-bold text-secondary">MOTIVO DEL REPORTE</label>
+                <select name="tipo_motivo" class="form-select border-0 shadow-sm mb-4 py-2" required>
+                    <option value="" selected disabled>Selecciona una opción...</option>
+                    <option value="COPYRIGHT">Derechos de Autor (Copyright)</option>
+                    <option value="SPAM">Contenido Spam / Basura</option>
+                    <option value="ERROR">Archivo Dañado o Equivocado</option>
+                </select>
+                
+                <label class="form-label small fw-bold text-secondary">DETALLES ADICIONALES</label>
+                <textarea name="razon" class="form-control border-0 shadow-sm" rows="3" placeholder="Explica brevemente cuál es el problema..." required></textarea>
+            </div>
+            <div class="modal-footer border-0 bg-light p-4 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-danger px-4 fw-bold shadow-sm">Enviar Reporte</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalReporteComentario" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <form id="formReporteComentario" method="post" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            {% csrf_token %}
+            <div class="modal-header bg-dark text-white border-0 p-3">
+                <h6 class="modal-title fw-bold" id="tituloReporteComentario"><i class="bi bi-flag-fill me-2"></i>Reportar</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3 bg-light">
+                <select name="tipo_motivo" class="form-select border-0 shadow-sm mb-3 text-sm" required>
+                    <option value="SPAM">Es Spam</option>
+                    <option value="CONTENIDO">Ofensivo / Inapropiado</option>
+                </select>
+                <textarea name="razon" class="form-control border-0 shadow-sm form-control-sm" rows="2" placeholder="¿Por qué lo reportas?" required></textarea>
+            </div>
+            <div class="modal-footer border-0 bg-light p-3 pt-0">
+                <button type="submit" class="btn btn-dark btn-sm w-100 fw-bold shadow-sm">Reportar usuario</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .fade-in { animation: fadeIn 0.4s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .transition-hover { transition: transform 0.2s ease, background-color 0.2s ease; }
+    .transition-hover:hover { background-color: #f8fafc !important; transform: translateX(5px); }
+</style>
+
+<script>
+    function abrirReporteComentario(id, usuario) {
+        const modalEl = document.getElementById('modalReporteComentario');
+        const form = document.getElementById('formReporteComentario');
+        const titulo = document.getElementById('tituloReporteComentario');
+        
+        // Actualizamos dinámicamente el destino del formulario
+        form.action = `/reportar/comentario/${id}/`;
+        titulo.innerHTML = `<i class="bi bi-flag-fill me-2"></i>Reportar a @${usuario}`;
+        
+        // Mostramos el modal usando la API de Bootstrap
+        const myModal = new bootstrap.Modal(modalEl);
+        myModal.show();
+    }
+</script>
+{% endblock %}
