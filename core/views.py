@@ -8,8 +8,21 @@ from django.contrib import messages as dj_messages
 from trabajos.models import Trabajo, Categoria
 # Traemos los modelos de esta misma app ('core')
 from .models import Comentario, Reporte
+from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import PermissionDenied
 
 User = get_user_model()
+
+# Creamos la función que verifica el rol
+def es_admin_o_moderador(user):
+    # Si no está logueado, lo rechaza
+    if not user.is_authenticated:
+        return False
+    # Si es superadmin O es moderador, lo deja pasar
+    if user.is_superuser or user.is_moderador:
+        return True
+    # Si es un estudiante normal, lanza un error de "Acceso Denegado"
+    raise PermissionDenied
 
 # ==========================================
 # VISTAS PÚBLICAS Y DE NAVEGACIÓN
@@ -102,7 +115,7 @@ def subir_trabajo(request):
 # VISTAS DE ADMINISTRACIÓN (DASHBOARD)
 # ==========================================
 
-@login_required
+@user_passes_test(es_admin_o_moderador)
 def admin_dashboard(request):
     """Panel de control principal para los administradores"""
     # Protección total: Si no es admin, lo echamos de aquí
@@ -137,7 +150,7 @@ def admin_dashboard(request):
 # FUNCIONES DE ACCIÓN DEL DASHBOARD (ELIMINAR/RESOLVER)
 # ==========================================
 
-@login_required
+@user_passes_test(es_admin_o_moderador)
 def resolver_reporte(request, reporte_id):
     """Marca un reporte como falsa alarma (No elimina nada)"""
     if request.method == 'POST' and request.user.is_staff:
@@ -147,7 +160,7 @@ def resolver_reporte(request, reporte_id):
         dj_messages.success(request, "El reporte fue marcado como resuelto.")
     return redirect('dashboard')
 
-@login_required
+@user_passes_test(es_admin_o_moderador)
 def eliminar_trabajo_admin(request, trabajo_id):
     """El martillo de baneo: Elimina el trabajo y todo lo asociado a él"""
     if request.method == 'POST' and request.user.is_staff:
@@ -157,7 +170,7 @@ def eliminar_trabajo_admin(request, trabajo_id):
         dj_messages.success(request, f"¡El trabajo '{titulo_borrado}' ha sido eliminado para siempre!")
     return redirect('dashboard')
 
-@login_required
+@user_passes_test(es_admin_o_moderador)
 def eliminar_comentario_admin(request, comentario_id):
     """Borra comentarios tóxicos o spam"""
     if request.method == 'POST' and request.user.is_staff:
@@ -200,7 +213,7 @@ def reportar(request, tipo_obj, obj_id):
     # Si alguien intenta entrar a la URL directamente sin enviar el formulario, lo mandamos al home
     return redirect('home')
 
-@login_required
+@user_passes_test(es_admin_o_moderador)
 def gestionar_usuarios(request):
     """Página para ver y buscar a todos los usuarios registrados"""
     if not request.user.is_staff:

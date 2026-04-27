@@ -18,7 +18,7 @@
 
 <div class="container mb-5 fade-in" style="animation-delay: 0.1s;">
     <div class="category-scroll-container py-2">
-        <span class="fw-bold text-secondary me-3 d-none d-md-inline-block">Explorar:</span>
+        <span class="fw-bold text-secondary me-3 d-none d-md-inline-block"></span>
         
         <a href="{% url 'home' %}" class="btn rounded-pill btn-filter {% if not request.GET.cat %}active{% endif %}">
             Todos
@@ -92,6 +92,7 @@
     /* Contenedor de scroll para las categorías */
     .category-scroll-container {
         display: flex;
+        justify-content: center;
         overflow-x: auto;
         white-space: nowrap;
         gap: 0.5rem;
