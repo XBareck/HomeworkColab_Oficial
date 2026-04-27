@@ -10,6 +10,7 @@ from trabajos.models import Trabajo, Categoria
 from .models import Comentario, Reporte
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 
 User = get_user_model()
 
@@ -48,10 +49,14 @@ def home(request):
     if categoria_id:
         trabajos = trabajos.filter(categoria_id=categoria_id)
 
+    paginator = Paginator(trabajos, 9)
+    numero_pagina = request.GET.get('page')
+    trabajos = paginator.get_page(numero_pagina)
+
     context = {
         'trabajos': trabajos,
         'categorias': Categoria.objects.all().order_by('nombre'),
-        'query': query
+        'query': query,
     }
     return render(request, 'core/home.html', context)
 

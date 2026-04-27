@@ -75,6 +75,24 @@
             <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-4 mt-2">Ver todos los trabajos</a>
         </div>
     {% endfor %}
+
+    <div class="d-flex justify-content-center mt-4">
+    <span class="step-links">
+        {% if trabajos.has_previous %}
+            <a href="?page=1" class="btn btn-outline-primary btn-sm">&laquo; Primera</a>
+            <a href="?page={{ trabajos.previous_page_number }}" class="btn btn-outline-primary btn-sm">Anterior</a>
+        {% endif %}
+
+        <span class="current fw-bold mx-3">
+            Página {{ trabajos.number }} de {{ trabajos.paginator.num_pages }}
+        </span>
+
+        {% if trabajos.has_next %}
+            <a href="?page={{ trabajos.next_page_number }}" class="btn btn-outline-primary btn-sm">Siguiente</a>
+            <a href="?page={{ trabajos.paginator.num_pages }}" class="btn btn-outline-primary btn-sm">Última &raquo;</a>
+        {% endif %}
+    </span>
+</div>
 </div>
 
 <style>
